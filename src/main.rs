@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 #[derive(Debug)]
-struct Node {
-    children: HashMap<String, Box<Node>>,
-    value: Option<String>,
+struct Node<V> {
+    children: HashMap<String, Box<Node<V>>>,
+    value: Option<V>,
 }
 
-impl Node {
+impl<V> Node<V> {
     fn new() -> Self {
         Self {
             children: HashMap::new(),
@@ -16,20 +16,20 @@ impl Node {
 }
 
 #[derive(Debug)]
-struct Trie {
-    root: Node,
+struct Trie<V> {
+    root: Node<V>,
 }
 
-impl Trie {
+impl<V> Trie<V> {
     fn new() -> Self {
         Self { root: Node::new() }
     }
 
-    fn insert(&mut self, key: String, value: String) {
+    fn insert(&mut self, key: String, value: V) {
         Self::insert_recursive(&mut self.root, &key, value);
     }
 
-    fn insert_recursive(node: &mut Node, key: &str, value: String) {
+    fn insert_recursive(node: &mut Node<V>, key: &str, value: V) {
         if key.is_empty() {
             node.value = Some(value);
             return;
@@ -80,11 +80,11 @@ impl Trie {
         );
     }
 
-    fn get(&self, key: &str) -> Option<&String> {
+    fn get(&self, key: &str) -> Option<&V> {
         Self::get_recursive(&self.root, key)
     }
 
-    fn get_recursive<'a>(node: &'a Node, key: &str) -> Option<&'a String> {
+    fn get_recursive<'a>(node: &'a Node<V>, key: &str) -> Option<&'a V> {
         if key.is_empty() {
             return node.value.as_ref();
         }
@@ -119,7 +119,7 @@ fn lcp(a: &str, b: &str) -> String {
 
 #[test]
 fn insert_test() {
-    let mut trie = Trie::new();
+    let mut trie = Trie::<String>::new();
 
     trie.insert("cat".to_string(), "1".to_string());
     trie.insert("bull".to_string(), "2".to_string());
@@ -128,4 +128,14 @@ fn insert_test() {
     assert_eq!(trie.get("cat"), Some(&"1".to_string()));
     assert_eq!(trie.get("car"), Some(&"14".to_string()));
     assert_eq!(trie.get("bull"), Some(&"2".to_string()));
+
+    let mut trie = Trie::<i32>::new();
+
+    trie.insert("cat".to_string(), 1);
+    trie.insert("bull".to_string(), 2);
+    trie.insert("car".to_string(), 14);
+
+    assert_eq!(trie.get("cat"), Some(&1));
+    assert_eq!(trie.get("car"), Some(&14));
+    assert_eq!(trie.get("bull"), Some(&2));
 }
