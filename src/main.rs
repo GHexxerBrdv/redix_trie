@@ -42,7 +42,42 @@ impl Trie {
             if common.is_empty() {
                 continue;
             }
+
+            if common == edge {
+                let child = node.children.get_mut(&edge).unwrap();
+                let remaining = &key[edge.len()..];
+                Self::insert_recursive(child, remaining, value);
+                return;
+            }
+
+            let old_child = node.children.remove(&edge).unwrap();
+            let old_suffix = edge[common.len()..].to_string();
+            let new_suffix = key[common.len()..].to_string();
+
+            let mut new_node = Node {
+                children: HashMap::new(),
+                value: None,
+            };
+
+            new_node.children.insert(old_suffix, old_child);
+            new_node.children.insert(
+                new_suffix,
+                Box::new(Node {
+                    children: HashMap::new(),
+                    value: Some(value),
+                }),
+            );
+
+            node.children.insert(common, Box::new(new_node));
+            return;
         }
+        node.children.insert(
+            key.to_string(),
+            Box::new(Node {
+                children: HashMap::new(),
+                value: Some(value),
+            }),
+        );
     }
 }
 
