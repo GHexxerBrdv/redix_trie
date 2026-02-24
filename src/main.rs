@@ -79,6 +79,25 @@ impl Trie {
             }),
         );
     }
+
+    fn get(&self, key: &str) -> Option<&String> {
+        Self::get_recursive(&self.root, key)
+    }
+
+    fn get_recursive<'a>(node: &'a Node, key: &str) -> Option<&'a String> {
+        if key.is_empty() {
+            return node.value.as_ref();
+        }
+
+        for (edge, child) in &node.children {
+            if key.starts_with(edge) {
+                let remaining = &key[edge.len()..];
+                return Self::get_recursive(child, remaining);
+            }
+        }
+
+        None
+    }
 }
 
 fn main() {
@@ -96,4 +115,17 @@ fn lcp(a: &str, b: &str) -> String {
         }
     }
     result
+}
+
+#[test]
+fn insert_test() {
+    let mut trie = Trie::new();
+
+    trie.insert("cat".to_string(), "1".to_string());
+    trie.insert("bull".to_string(), "2".to_string());
+    trie.insert("car".to_string(), "14".to_string());
+
+    assert_eq!(trie.get("cat"), Some(&"1".to_string()));
+    assert_eq!(trie.get("car"), Some(&"14".to_string()));
+    assert_eq!(trie.get("bull"), Some(&"2".to_string()));
 }
